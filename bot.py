@@ -30,8 +30,6 @@ START_IMG = 'https://graph.org/file/3e0a6b443746a0e015d72-c32a268e5c7ec2feb4.jpg
 logging.basicConfig(level=logging.INFO)
 client = TelegramClient('edit_guard', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
-# --- DATABASE (Simple List for Broadcast) ---
-# Note: Real bot ke liye Database (MongoDB/SQL) use karna chahiye.
 users_list = set()
 
 # --- BUTTONS ---
@@ -43,20 +41,34 @@ MAIN_BUTTONS = [
     [Button.inline("📖 𝖧𝖾𝗅𝗉 𝖬𝖾𝗇𝗎", b"help_menu"), Button.url("👤 𝖮𝗐𝗇𝖾𝗋", "https://t.me/XenoEmpir")]
 ]
 
-# --- START COMMAND ---
+# --- START COMMAND (STYLISH CAPTION) ---
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     users_list.add(event.sender_id)
     user = await event.get_sender()
+    
+    # New Stylish Caption
     caption = (
-        "✨ **𝖶𝖾𝗅𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽 𝖡𝗈𝗍** ✨\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "🛡️ **𝖬𝖺𝗂𝗇 𝖦𝗋𝗈𝗎𝗉𝗌 𝗆𝖾𝗂𝗇 𝖾𝖽𝗂𝗍𝖾𝖽 𝗆𝖾𝗌𝗌𝖺𝗀𝖾𝗌 𝗄𝗈 𝖽𝖾𝗍𝖾𝗀𝗍 𝗄𝖺𝗋𝗍𝖺 𝗁𝗈𝗈𝗇.**\n"
-        "🚀 **𝖢𝗅𝗂𝖼𝗄 𝖻𝖾𝗅𝗈𝗐 𝖿𝗈𝗋 𝗆𝗈𝗋𝖾 𝗂𝗇𝖿𝗈!**"
+        "╔══════════════════════╗\n"
+        "      ✨ **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣 𝖡𝖮𝖳** ✨\n"
+        "╚══════════════════════╝\n\n"
+        "👋 **𝖧𝖾𝗅𝗅𝗈** " + f"[{user.first_name}](tg://user?id={user.id})" + " !\n\n"
+        "🛡️ **𝖨 𝖺𝗆 𝖺 𝗉𝗈𝗐𝖾𝗋𝖿𝗎𝗅 𝖬𝖾𝗌𝗌𝖺𝗀𝖾 𝖤𝖽𝗂𝗍 𝖣𝖾𝗍𝖾𝖼𝗍𝗈𝗋.**\n"
+        "💡 **𝖨 𝗐𝗂𝗅𝗅 𝗅𝗈𝗀 𝖾𝗏𝖾𝗋𝗒 𝖾𝖽𝗂𝗍𝖾𝖽 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗂𝗇 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌.**\n\n"
+        "🚀 **𝖯𝗋𝖾𝗌𝗌 𝗍𝗁𝖾 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾𝗅𝗈𝗐 𝖿𝗈𝗋 𝖬𝗈𝗋𝖾 𝖨𝗇𝖿𝗈!**\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━"
     )
+    
     await event.reply(caption, file=START_IMG, buttons=MAIN_BUTTONS)
+    
+    # Log Group Notification (Exact like your screenshot with Mention)
     try:
-        await client.send_message(LOG_GROUP, f"👤 **𝖭𝖾𝗐 𝖴𝗌𝖾𝗋:** {user.first_name}\n🆔 **𝖨𝖣:** `{user.id}`")
+        log_text = (
+            "𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭\n"
+            f"👤 **𝖭𝖾𝗐 𝖴𝗌𝖾𝗋:** [{user.first_name}](tg://user?id={user.id})\n"
+            f"🆔 **𝖨𝖣:** `{user.id}`"
+        )
+        await client.send_message(LOG_GROUP, log_text)
     except: pass
 
 # --- HELP CALLBACK & COMMAND ---
@@ -66,10 +78,10 @@ async def help_handler(event):
     help_text = (
         "📖 **𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽 - 𝖧𝖾𝗅𝗉 𝖦𝗎𝗂𝖽𝖾**\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "🔹 **/𝗌𝗍𝖺𝗋𝗍** : 𝖳𝗈 𝖼𝗁𝖾𝖼𝗄 𝗂𝖿 𝖻𝗈𝗍 𝖺𝗅𝗂𝗏𝖾.\n"
-        "🔹 **/𝗁𝖾𝗅𝗉** : 𝖳𝗈 𝗌𝖾𝖾 𝗍𝗁𝗂𝗌 𝗆𝖾𝗇𝗎.\n"
+        "🔹 **/𝗌𝗍𝖺𝗋𝗍** : 𝖳𝗈 𝗋𝖾𝗌𝗍𝖺𝗋𝗍 𝗍𝗁𝖾 𝖻𝗈𝗍.\n"
+        "🔹 **/𝗁𝖾𝗅𝗉** : 𝖳𝗈 𝗀𝖾𝗍 𝗍𝗁𝗂𝗌 𝗆𝖾𝗇𝗎.\n"
         "🔹 **/𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍** : (𝖮𝗐𝗇𝖾𝗋 𝖮𝗇𝗅𝗒).\n\n"
-        "⚠️ **𝖭𝗈𝗍𝖾:** 𝖡𝗈𝗍 𝗆𝗎𝗌𝗍 𝖻𝖾 𝖺𝖽𝗆𝗂𝗇 𝗂𝗇 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉 𝗍𝗈 𝖽𝖾𝗍𝖾𝗀𝗍 𝖾𝖽𝗂𝗍𝗌!"
+        "⚠️ **𝖭𝗈𝗍𝖾:** 𝖬𝖺𝗄𝖾 𝗆𝖾 𝖠𝖽𝗆𝗂𝗇 𝗂𝗇 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉 𝗐𝗂𝗍𝗁 '𝖯𝗈𝗌𝗍 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌' 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇!"
     )
     if isinstance(event, events.CallbackQuery.Event):
         await event.edit(help_text, buttons=[Button.inline("⬅️ 𝖡𝖺𝖼𝗄", b"start_back")])
@@ -78,7 +90,16 @@ async def help_handler(event):
 
 @client.on(events.CallbackQuery(data=b"start_back"))
 async def back_to_start(event):
-    await event.edit(file=START_IMG, buttons=MAIN_BUTTONS)
+    # Back to start UI logic
+    user = await event.get_sender()
+    caption = (
+        "╔══════════════════════╗\n"
+        "      ✨ **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣 𝖡𝖮𝖳** ✨\n"
+        "╚══════════════════════╝\n\n"
+        "👋 **𝖧𝖾𝗅𝗅𝗈** " + f"[{user.first_name}](tg://user?id={user.id})" + " !\n\n"
+        "🚀 **𝖨'𝗆 𝗋𝖾𝖺𝖽𝗒 𝗍𝗈 𝗀𝗎𝖺𝗋𝖽 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌.**"
+    )
+    await event.edit(caption, file=START_IMG, buttons=MAIN_BUTTONS)
 
 # --- STYLISH BROADCAST COMMAND ---
 @client.on(events.NewMessage(pattern='/broadcast'))
@@ -92,16 +113,16 @@ async def broadcast(event):
     
     msg = await event.reply("🚀 **𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖲𝗍𝖺𝗋𝗍𝗂𝗇𝗀...**")
     count = 0
-    for user_id in users_list:
+    for user_id in list(users_list):
         try:
             await client.send_message(user_id, reply)
             count += 1
-            await asyncio.sleep(0.3) # Avoid FloodWait
+            await asyncio.sleep(0.3)
         except: pass
     
     await msg.edit(f"✅ **𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉𝗅𝖾𝗍𝖾𝖽!**\n\n📢 **𝖲𝖾𝗇𝗍 𝖳𝗈:** `{count}` 𝖴𝗌𝖾𝗋𝗌")
 
-# --- EDIT DETECTION ---
+# --- EDIT DETECTION LOGIC (WITH MENTION) ---
 @client.on(events.MessageEdited)
 async def edit_handler(event):
     if event.is_private: return
@@ -114,8 +135,9 @@ async def edit_handler(event):
             "🛡️ **𝖤𝖣𝖨𝖳 𝖣𝖤𝖳𝖤𝖢𝖳𝖤𝖣** 🛡️\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"👥 **𝖦𝗋𝗈𝗎𝗉:** `{chat.title}`\n"
-            f"👤 **𝖴𝗌𝖾𝗋:** [{user.first_name}](tg://user?id={user.id})\n\n"
-            f"📝 **𝖬𝖾𝗌𝗌𝖺𝗀𝖾:**\n`{new_msg}`\n"
+            f"👤 **𝖴𝗌𝖾𝗋:** [{user.first_name}](tg://user?id={user.id})\n"
+            f"🆔 **𝖨𝖣:** `{user.id}`\n\n"
+            f"📝 **𝖭𝖾𝗐 𝖬𝖾𝗌𝗌𝖺𝗀𝖾:**\n`{new_msg}`\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━"
         )
         await client.send_message(LOG_GROUP, log_text)
