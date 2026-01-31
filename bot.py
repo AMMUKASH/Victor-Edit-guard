@@ -1,118 +1,120 @@
 import os
-import time
-import asyncio
-from telethon import TelegramClient, events, Button
-from flask import Flask
-from threading import Thread
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# --- CONFIGURATIONS ---
+# --- CONFIGURATION ---
 API_ID = 34135757
-API_HASH = 'd3d5548fe0d98eb1fb793c2c37c9e5c8'
-BOT_TOKEN = '8311404972:AAG6cmGBT-VmSgU4xnwA5aJtLMnVJKdlqXo' # Make sure this is the NEW token
+API_HASH = "d3d5548fe0d98eb1fb793c2c37c9e5c8"
+BOT_TOKEN = "8311404972:AAG6cmGBT-VmSgU4xnwA5aJtLMnVJKdlqXo"
+
+# IDs & Links
 OWNER_ID = 8482447535
-LOG_CHAT_ID = -1003867805165
-START_IMG = 'https://graph.org/file/3e0a6b443746a0e015d72-c32a268e5c7ec2feb4.jpg'
+LOG_GROUP = -1003867805165
+SUPPORT_GRP = "https://t.me/+PKYLDIEYiTljMzMx"
+UPDATE_CHN = "https://t.me/radhesupport"
+OWNER_LINK = "https://t.me/XenoEmpir"
+START_IMG = "https://graph.org/file/3e0a6b443746a0e015d72-c32a268e5c7ec2feb4.jpg"
 
-# Anti-Double Logic
-USERS = set()
-last_msg_time = {}
+app = Client("GuardBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# --- FLASK SERVER ---
-app = Flask('')
-@app.route('/')
-def home(): return "Bot is Online!"
-def run(): app.run(host='0.0.0.0', port=8080)
+# Forbidden Keywords
+BANNED_TAGS = ["porn", "sex", "kiss", "hot", "sexy", "nsfw", "18+", "pussy", "dick", "xxx"]
 
-# --- BOT CLIENT ---
-bot = TelegramClient('bot', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
-
-# --- KEYBOARDS ---
-MAIN_BUTTONS = [
+# --- BUTTONS ---
+START_BUTTONS = InlineKeyboardMarkup([
     [
-        Button.url("📢 Updates", "https://t.me/radhesupport"),
-        Button.url("👥 Support", "https://t.me/+PKYLDIEYiTljMzMx")
+        InlineKeyboardButton("📢 Updates", url=UPDATE_CHN),
+        InlineKeyboardButton("🎧 Support", url=SUPPORT_GRP)
     ],
     [
-        Button.inline("📜 Help", data="help"),
-        Button.inline("📖 Guide", data="guide")
-    ],
-    [Button.url("👨‍💻 Developer", "https://t.me/XenoEmpir")]
-]
+        InlineKeyboardButton("👤 Owner", url=OWNER_LINK),
+        InlineKeyboardButton("🛠 Help & Guide", callback_data="help_data")
+    ]
+])
 
-# --- START COMMAND (With Guard) ---
-@bot.on(events.NewMessage(pattern='/start'))
-async def start(event):
-    if not event.is_private: return
-    
-    # Double Response Check
-    current_time = time.time()
-    user_id = event.sender_id
-    if user_id in last_msg_time and (current_time - last_msg_time[user_id]) < 2:
-        return # Ignore duplicate request within 2 seconds
-    last_msg_time[user_id] = current_time
-    
-    USERS.add(user_id)
-    welcome_text = (
-        "✨ **Wᴇʟᴄᴏᴍᴇ Tᴏ Eᴅɪᴛ Gᴜᴀʀᴅ Bᴏᴛ** ✨\n\n"
-        "🛡️ Main aapke group ke edited messages ko track karke unhe log group mein bhejta hoon.\n\n"
-        "🚀 **Sᴛᴀᴛᴜs:** Online & Active\n"
-        "👤 **Oᴡɴᴇʀ:** [Xeno](tg://user?id=8482447535)\n\n"
-        "Neeche diye gaye buttons use karein 👇"
+# --- FUNCTIONS ---
+
+# Start Message with Photo
+@app.on_message(filters.command("start") & filters.private)
+async def start_cmd(bot, message):
+    await message.reply_photo(
+        photo=START_IMG,
+        caption=(f"✨ **Hello {message.from_user.mention}!**\n\n"
+                 "I am your advanced **NSFW Guard Bot**.\n\n"
+                 "🛡 I protect groups from inappropriate content, stickers, and text.\n"
+                 "👤 **Owner:** [Xeno](https://t.me/XenoEmpir)\n\n"
+                 "Add me to your group and make me admin to start!"),
+        reply_markup=START_BUTTONS
     )
-    await bot.send_file(event.chat_id, START_IMG, caption=welcome_text, buttons=MAIN_BUTTONS)
 
-# --- BROADCAST ---
-@bot.on(events.NewMessage(pattern='/broadcast'))
-async def broadcast(event):
-    if event.sender_id != OWNER_ID: return
-    if not event.reply_to_msg_id:
-        return await event.reply("Usage: Reply to a message with `/broadcast`")
-
-    msg = await event.get_reply_message()
-    count = 0
-    progress = await event.reply("🚀 Sending Broadcast...")
-
-    for user in list(USERS):
-        try:
-            await bot.send_message(user, msg)
-            count += 1
-            await asyncio.sleep(0.3) # Flood wait avoid karne ke liye
-        except: pass
-    
-    await progress.edit(f"✅ **Broadcast Done!**\nTotal: `{count}` users.")
-
-# --- HELP & GUIDE ---
-@bot.on(events.CallbackQuery)
-async def callback(event):
-    if event.data == b"help":
-        await event.edit("❓ **Hᴇʟᴘ Mᴇɴᴜ**\n\n• /start - Restart bot\n• /help - Show this menu\n• /guide - How to use\n• /broadcast - Owner only", buttons=Button.inline("⬅️ Back", data="back"))
-    elif event.data == b"guide":
-        await event.edit("📖 **Sᴇᴛᴜᴘ Gᴜɪᴅᴇ**\n\n1. Bot ko group mein add karein.\n2. Admin banayein.\n3. Ye automatic edited messages detect karega.", buttons=Button.inline("⬅️ Back", data="back"))
-    elif event.data == b"back":
-        # Back button logic to show main menu again
-        await event.delete()
-        await start(event)
-
-# --- EDIT GUARD LOGIC ---
-@bot.on(events.MessageEdited)
-async def edit_handler(event):
-    if event.is_private: return
-    try:
-        user = await event.get_sender()
-        chat = await event.get_chat()
-        
-        log_text = (
-            "🚀 **ᴇᴅɪᴛ ᴅᴇᴛᴇᴄᴛᴇᴅ**\n\n"
-            f"👤 **Usᴇʀ:** [{user.first_name}](tg://user?id={user.id})\n"
-            f"🏛️ **Gʀᴏᴜᴘ:** {chat.title}\n"
-            f"🖋️ **ɴᴇᴡ:** `{event.text}`"
+# Welcome New Members
+@app.on_message(filters.new_chat_members)
+async def welcome_member(bot, message):
+    for member in message.new_chat_members:
+        await message.reply_text(
+            f"👋 Hello {member.mention}, welcome to **{message.chat.title}**!\n"
+            "Please follow the rules and stay safe."
         )
-        await bot.send_message(LOG_CHAT_ID, log_text)
-        await event.reply(f"⚠️ **Eᴅɪᴛ Aʟᴇʀᴛ!** [{user.first_name}](tg://user?id={user.id}), edit mat karo!")
-    except: pass
+
+# NSFW Filter (Media, Stickers, GIFs)
+@app.on_message(filters.group & (filters.photo | filters.video | filters.animation | filters.sticker))
+async def nsfw_media_filter(bot, message):
+    check_text = ""
+    if message.animation and message.animation.file_name:
+        check_text = message.animation.file_name.lower()
+    elif message.sticker and message.sticker.set_name:
+        check_text = message.sticker.set_name.lower()
+    
+    if any(word in check_text for word in BANNED_TAGS):
+        try:
+            await message.delete()
+            # Send Log to Log Group
+            log_text = (f"🚨 **NSFW Media Detected**\n\n"
+                        f"👤 **User:** {message.from_user.mention} (`{message.from_user.id}`)\n"
+                        f"👥 **Group:** {message.chat.title}\n"
+                        f"🚫 **Action:** Message Deleted")
+            await bot.send_message(LOG_GROUP, log_text)
+        except Exception:
+            pass
+
+# NSFW Text Filter
+@app.on_message(filters.group & filters.text & ~filters.command(["start", "help", "broadcast"]))
+async def nsfw_text_filter(bot, message):
+    if any(word in message.text.lower() for word in BANNED_TAGS):
+        try:
+            await message.delete()
+            # Log to Log Group
+            log_text = (f"🚨 **NSFW Text Detected**\n\n"
+                        f"👤 **User:** {message.from_user.mention}\n"
+                        f"💬 **Text:** `{message.text[:100]}`\n"
+                        f"🚫 **Action:** Message Deleted")
+            await bot.send_message(LOG_GROUP, log_text)
+        except Exception:
+            pass
+
+# Help Command
+@app.on_message(filters.command("help"))
+async def help_command(bot, message):
+    guide = (
+        "**📚 GuardBot Help Guide**\n\n"
+        "1️⃣ Add me to your group.\n"
+        "2️⃣ Promote me as Admin.\n"
+        "3️⃣ Give 'Delete Messages' permission.\n\n"
+        "I will automatically scan and remove NSFW stickers, GIFs, and text messages."
+    )
+    await message.reply_text(guide)
+
+# Simple Broadcast (Owner Only)
+@app.on_message(filters.command("broadcast") & filters.user(OWNER_ID))
+async def broadcast(bot, message):
+    if not message.reply_to_message:
+        return await message.reply_text("❌ Please reply to a message to broadcast.")
+    
+    await message.reply_text("🔄 **Broadcast feature initiated...**\n(Note: Connect a database for global group messaging.)")
 
 # --- RUN BOT ---
-if __name__ == '__main__':
-    Thread(target=run).start()
-    print("Edit Guard Bot Started!")
-    bot.run_until_disconnected()
+if __name__ == "__main__":
+    print("-----------------------")
+    print("GuardBot is now Online!")
+    print("-----------------------")
+    app.run()
