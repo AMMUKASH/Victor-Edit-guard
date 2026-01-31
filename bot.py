@@ -26,7 +26,7 @@ API_HASH = 'd3d5548fe0d98eb1fb793c2c37c9e5c8'
 BOT_TOKEN = '8311404972:AAG6cmGBT-VmSgU4xnwA5aJtLMnVJKdlqXo'
 LOG_GROUP = -1003867805165
 OWNER_ID = 8482447535
-START_IMG = 'https://graph.org/file/06f17f2da3be3ddf5c9d6-f22b08d691cecb6be9.jpg'
+START_IMG = 'https://graph.org/file/3e0a6b443746a0e015d72-c32a268e5c7ec2feb4.jpg'
 
 # Logging
 logging.basicConfig(level=logging.INFO)
