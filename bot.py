@@ -1,5 +1,24 @@
 import logging
+import os
 from telethon import TelegramClient, events, Button
+from flask import Flask
+from threading import Thread
+
+# --- RENDER PORT FIX (FLASK) ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is Running Successfully!"
+
+def run():
+    # Render automatically sets a PORT environment variable
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
 
 # --- CONFIGURATION ---
 API_ID = 34135757
@@ -9,7 +28,7 @@ LOG_GROUP = -1003867805165
 OWNER_ID = 8482447535
 START_IMG = 'https://graph.org/file/06f17f2da3be3ddf5c9d6-f22b08d691cecb6be9.jpg'
 
-# Logging setup
+# Logging
 logging.basicConfig(level=logging.INFO)
 
 client = TelegramClient('edit_guard', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
@@ -47,12 +66,12 @@ async def help(event):
         "🔹 **Commands:**\n"
         "• `/start` : Bot check karne ke liye.\n"
         "• `/help` : Ye menu dekhne ke liye.\n"
-        "• `/broadcast` : (Owner Only) Sabhi users ko message bhejne ke liye.\n\n"
+        "• `/broadcast` : (Owner Only) Sabhi ko message bhejne ke liye.\n\n"
         "⚠️ **Note:** Bot ko group mein admin hona chahiye!"
     )
     await event.reply(help_text, buttons=Button.inline("Back", b"start_back"))
 
-# --- BROADCAST COMMAND ---
+# --- BROADCAST COMMAND (Owner Only) ---
 @client.on(events.NewMessage(pattern='/broadcast'))
 async def broadcast(event):
     if event.sender_id != OWNER_ID:
@@ -62,28 +81,34 @@ async def broadcast(event):
     if not reply:
         return await event.reply("👉 Message ko reply karke `/broadcast` likhein.")
     
-    await event.reply("🚀 **Broadcast Send Ho Gaya!**")
-    # Note: Proper broadcast ke liye Database zaroori hota hai.
+    await event.reply("🚀 **Broadcast Start Ho Gaya!**")
+    # Broadcast logic yahan aayega
 
 # --- EDIT DETECTION LOGIC ---
 @client.on(events.MessageEdited)
 async def edit_handler(event):
-    if event.is_private: return
+    if event.is_private:
+        return
     try:
         chat = await event.get_chat()
         user = await event.get_sender()
-        msg = event.original_update.message.message
+        original_msg = event.original_update.message.message
         
         log_text = (
-            f"🛡️ **EDIT DETECTED**\n"
-            f"━━━━━━━━━━━━━━\n"
-            f"👥 **Chat:** {chat.title}\n"
-            f"👤 **User:** {user.first_name} (`{user.id}`)\n\n"
-            f"📝 **Old Message:**\n`{msg}`"
+            "🛡️ **EDIT DETECTED** 🛡️\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"👥 **Group:** `{chat.title}`\n"
+            f"👤 **User:** [{user.first_name}](tg://user?id={user.id})\n"
+            f"🆔 **User ID:** `{user.id}`\n\n"
+            f"📝 **Original Message:**\n`{original_msg}`\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━"
         )
         await client.send_message(LOG_GROUP, log_text)
     except Exception as e:
         print(f"Error: {e}")
 
-print("✅ Bot is Starting...")
-client.run_until_disconnected()
+# --- BOT INITIATION ---
+if __name__ == "__main__":
+    keep_alive()  # Starts the Flask server for Render
+    print("✅ Bot is Starting...")
+    client.run_until_disconnected()
