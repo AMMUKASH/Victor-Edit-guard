@@ -5,7 +5,7 @@ from telethon import TelegramClient, events, Button
 from flask import Flask
 from threading import Thread
 
-# --- RENDER PORT FIX ---
+# --- RENDER PORT FIX (Flask Server) ---
 app = Flask('')
 @app.route('/')
 def home(): return "Bot is Running Successfully!"
@@ -41,13 +41,20 @@ MAIN_BUTTONS = [
     [Button.inline("📖 𝖧𝖾𝗅𝗉 𝖬𝖾𝗇𝗎", b"help_menu"), Button.url("👤 𝖮𝗐𝗇𝖾𝗋", "https://t.me/XenoEmpir")]
 ]
 
-# --- START COMMAND (STYLISH CAPTION) ---
+WELCOME_BUTTONS = [
+    [
+        Button.url("❂ 𝐔𝛒ᴅ𝛂𝛕𝛆 ❂", "https://t.me/radhesupport"),
+        Button.url("❂ 𝐒𝛖𝛒𝛒𝛔ʀ𝛕 ❂", "https://t.me/+PKYLDIEYiTljMzMx")
+    ],
+    [Button.url("♻ 𝐀ᴅᴅ 𝐌𝝴 𝝸𝝶 𝐘𝞂𝞄𝐑 𝐆𝐑𝞂𝞄𝞀 ♻", "https://t.me/EdiitGuardbot?startgroup=true")]
+]
+
+# --- START COMMAND ---
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     users_list.add(event.sender_id)
     user = await event.get_sender()
     
-    # New Stylish Caption
     caption = (
         "╔══════════════════════╗\n"
         "      ✨ **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣 𝖡𝖮𝖳** ✨\n"
@@ -61,7 +68,6 @@ async def start(event):
     
     await event.reply(caption, file=START_IMG, buttons=MAIN_BUTTONS)
     
-    # Log Group Notification (Exact like your screenshot with Mention)
     try:
         log_text = (
             "𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭\n"
@@ -71,7 +77,7 @@ async def start(event):
         await client.send_message(LOG_GROUP, log_text)
     except: pass
 
-# --- HELP CALLBACK & COMMAND ---
+# --- HELP & BACK CALLBACKS ---
 @client.on(events.NewMessage(pattern='/help'))
 @client.on(events.CallbackQuery(data=b"help_menu"))
 async def help_handler(event):
@@ -90,7 +96,6 @@ async def help_handler(event):
 
 @client.on(events.CallbackQuery(data=b"start_back"))
 async def back_to_start(event):
-    # Back to start UI logic
     user = await event.get_sender()
     caption = (
         "╔══════════════════════╗\n"
@@ -101,11 +106,67 @@ async def back_to_start(event):
     )
     await event.edit(caption, file=START_IMG, buttons=MAIN_BUTTONS)
 
-# --- STYLISH BROADCAST COMMAND ---
+# --- WELCOME FEATURE ---
+@client.on(events.ChatAction)
+async def welcome(event):
+    if event.user_joined or event.user_added:
+        try:
+            user = await event.get_user()
+            chat = await event.get_chat()
+            welcome_text = (
+                f"✨ **𝖶𝖾𝗅𝖼𝗈𝗆𝖾 𝗍𝗈 {chat.title}!** ✨\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"👋 **𝖧𝖾𝗅𝗅𝗈** [{user.first_name}](tg://user?id={user.id}) !\n"
+                "🛡️ **𝖨 𝖺𝗆 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽, 𝖨 𝗐𝗂𝗅𝗅 𝗄𝖾𝖾𝗉 𝗍𝗁𝗂𝗌 𝗀𝗋𝗈𝗎𝗉 𝗌𝖺𝖿𝖾.**\n\n"
+                "♻ **𝐀ᴅᴅ 𝐌𝝴 𝝸𝝶 𝐘𝞂𝞄𝐑 𝐆𝐑𝞂𝞄𝞀** ♻"
+            )
+            await event.reply(welcome_text, file=START_IMG, buttons=WELCOME_BUTTONS)
+        except: pass
+
+# --- EDIT GUARD (DELETE & NOTIFY) ---
+@client.on(events.MessageEdited)
+async def edit_handler(event):
+    if event.is_private: return
+    try:
+        chat = await event.get_chat()
+        user = await event.get_sender()
+        
+        # Edited message delete karega
+        await event.delete()
+
+        # Group me notification
+        del_caption = (
+            "♻ **𝐀ᴅᴅ 𝐌𝝴 𝝸𝝶 𝐘𝞂𝞄𝐑 𝐆𝐑𝞂𝞄𝞀** ♻\n"
+            " @EdiitGuardbot\n\n"
+            "❂ **𝐔𝛒ᴅ𝛂𝛕𝛆** ❂"
+        )
+        await event.respond(del_caption, file=START_IMG)
+
+        # Log group report
+        log_text = (
+            "🛡️ **𝖤𝖣𝖨𝖳 𝖣𝖤𝖳𝖤𝖢𝖳𝖤𝖣 & 𝖣𝖤𝖫𝖤𝖳𝖤𝖣**\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"👥 **𝖦𝗋𝗈𝗎𝗉:** `{chat.title}`\n"
+            f"👤 **𝖴𝗌𝖾𝗋:** [{user.first_name}](tg://user?id={user.id})\n"
+            f"📝 **𝖤𝖽𝗂𝗍𝖾𝖽 𝖬𝗌𝗀:** `{event.message.message}`\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━"
+        )
+        await client.send_message(LOG_GROUP, log_text)
+    except: pass
+
+# --- ANTI-DELETE LOGS ---
+@client.on(events.Raw(events.types.UpdateDeleteChannelMessages))
+@client.on(events.Raw(events.types.UpdateDeleteMessages))
+async def anti_delete_log(event):
+    try:
+        await client.send_message(LOG_GROUP, "🗑️ **𝖠 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗐𝖺𝗌 𝖽𝖾𝗅𝖾𝗍𝖾𝖽 𝗂𝗇 𝖺 𝗀𝗋𝗈𝗎𝗉!**")
+    except: pass
+
+# --- BROADCAST COMMAND ---
 @client.on(events.NewMessage(pattern='/broadcast'))
 async def broadcast(event):
     if event.sender_id != OWNER_ID:
-        return await event.reply("❌ **𝖲𝗂𝗋𝗿 𝖮𝗐𝗇𝖾𝗋 𝗁𝗂 𝗎𝗌𝖾 𝗄𝖺𝗋 𝗌𝖺𝗄𝗍𝖺 𝗁𝖺𝗂!**")
+        return await event.reply("❌ **𝖲𝗂𝗋𝗋 𝖮𝗐𝗇𝖾𝗋 𝗁𝗂 𝗎𝗌𝖾 𝗄𝖺𝗋 𝗌𝖺𝗄𝗍𝖺 𝗁𝖺𝗂!**")
     
     reply = await event.get_reply_message()
     if not reply:
@@ -122,27 +183,7 @@ async def broadcast(event):
     
     await msg.edit(f"✅ **𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉𝗅𝖾𝗍𝖾𝖽!**\n\n📢 **𝖲𝖾𝗇𝗍 𝖳𝗈:** `{count}` 𝖴𝗌𝖾𝗋𝗌")
 
-# --- EDIT DETECTION LOGIC (WITH MENTION) ---
-@client.on(events.MessageEdited)
-async def edit_handler(event):
-    if event.is_private: return
-    try:
-        chat = await event.get_chat()
-        user = await event.get_sender()
-        new_msg = event.message.message 
-        
-        log_text = (
-            "🛡️ **𝖤𝖣𝖨𝖳 𝖣𝖤𝖳𝖤𝖢𝖳𝖤𝖣** 🛡️\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"👥 **𝖦𝗋𝗈𝗎𝗉:** `{chat.title}`\n"
-            f"👤 **𝖴𝗌𝖾𝗋:** [{user.first_name}](tg://user?id={user.id})\n"
-            f"🆔 **𝖨𝖣:** `{user.id}`\n\n"
-            f"📝 **𝖭𝖾𝗐 𝖬𝖾𝗌𝗌𝖺𝗀𝖾:**\n`{new_msg}`\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━"
-        )
-        await client.send_message(LOG_GROUP, log_text)
-    except: pass
-
+# --- MAIN EXECUTION ---
 if __name__ == "__main__":
     keep_alive()
     print("✅ Bot is Starting...")
