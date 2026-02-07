@@ -1,7 +1,7 @@
 import logging
 import os
 import asyncio
-from telethon import TelegramClient, events, Button
+from telethon import TelegramClient, events, Button, types  # 'types' yahan add kiya
 from flask import Flask
 from threading import Thread
 
@@ -130,19 +130,13 @@ async def edit_handler(event):
     try:
         chat = await event.get_chat()
         user = await event.get_sender()
-        
-        # Edited message delete karega
         await event.delete()
-
-        # Group me notification
         del_caption = (
             "♻ **𝐀ᴅᴅ 𝐌𝝴 𝝸𝝶 𝐘𝞂𝞄𝐑 𝐆𝐑𝞂𝞄𝞀** ♻\n"
             " @EdiitGuardbot\n\n"
             "❂ **𝐔𝛒ᴅ𝛂𝛕𝛆** ❂"
         )
         await event.respond(del_caption, file=START_IMG)
-
-        # Log group report
         log_text = (
             "🛡️ **𝖤𝖣𝖨𝖳 𝖣𝖤𝖳𝖤𝖢𝖳𝖤𝖣 & 𝖣𝖤𝖫𝖤𝖳𝖤𝖣**\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -154,9 +148,9 @@ async def edit_handler(event):
         await client.send_message(LOG_GROUP, log_text)
     except: pass
 
-# --- ANTI-DELETE LOGS ---
-@client.on(events.Raw(events.types.UpdateDeleteChannelMessages))
-@client.on(events.Raw(events.types.UpdateDeleteMessages))
+# --- ANTI-DELETE LOGS (FIXED) ---
+@client.on(events.Raw(types.UpdateDeleteChannelMessages))
+@client.on(events.Raw(types.UpdateDeleteMessages))
 async def anti_delete_log(event):
     try:
         await client.send_message(LOG_GROUP, "🗑️ **𝖠 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗐𝖺𝗌 𝖽𝖾𝗅𝖾𝗍𝖾𝖽 𝗂𝗇 𝖺 𝗀𝗋𝗈𝗎𝗉!**")
@@ -167,11 +161,9 @@ async def anti_delete_log(event):
 async def broadcast(event):
     if event.sender_id != OWNER_ID:
         return await event.reply("❌ **𝖲𝗂𝗋𝗋 𝖮𝗐𝗇𝖾𝗋 𝗁𝗂 𝗎𝗌𝖾 𝗄𝖺𝗋 𝗌𝖺𝗄𝗍𝖺 𝗁𝖺𝗂!**")
-    
     reply = await event.get_reply_message()
     if not reply:
         return await event.reply("👉 **𝖬𝖾𝗌𝗌𝖺𝗀𝖾 𝗄𝗈 𝗋𝖾𝗉𝗅𝗒 𝗄𝖺𝗋𝗄𝖾 `/𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍` 𝗅𝗂𝗄𝗁𝖾𝗂𝗇.**")
-    
     msg = await event.reply("🚀 **𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖲𝗍𝖺𝗋𝗍𝗂𝗇𝗀...**")
     count = 0
     for user_id in list(users_list):
@@ -180,11 +172,8 @@ async def broadcast(event):
             count += 1
             await asyncio.sleep(0.3)
         except: pass
-    
     await msg.edit(f"✅ **𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉𝗅𝖾𝗍𝖾𝖽!**\n\n📢 **𝖲𝖾𝗇𝗍 𝖳𝗈:** `{count}` 𝖴𝗌𝖾𝗋𝗌")
 
-# --- MAIN EXECUTION ---
 if __name__ == "__main__":
     keep_alive()
-    print("✅ Bot is Starting...")
     client.run_until_disconnected()
