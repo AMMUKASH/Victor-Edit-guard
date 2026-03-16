@@ -86,12 +86,15 @@ async def edit_handler(event):
         chat = await event.get_chat()
         sender = await event.get_sender()
         
-        # Anonymous admin/Owner logic
+        # Anonymous admin/Owner logic fix
         if isinstance(sender, types.Channel):
+            sender_name = "Anonymous Admin 🎭"
             sender_mention = "𝐀𝐧𝐨𝐧𝐲𝐦𝐨𝐮𝐬 𝐀𝐝𝐦𝐢𝐧 🎭"
         elif sender:
+            sender_name = sender.first_name
             sender_mention = f"[{sender.first_name}](tg://user?id={sender.id})"
         else:
+            sender_name = "Unknown"
             sender_mention = "𝐔𝐧𝐤𝐧𝐨𝐰𝐧 𝐔𝐬𝐞𝐫"
 
         msg_text = event.message.message or "Media Content"
@@ -114,25 +117,26 @@ async def edit_handler(event):
         
         # 3. Log Report
         log_text = (
-            "🚀 #Edit_Event\n"
-            f"👥 **Group:** `{chat.title}`\n"
-            f"👤 **User:** {sender_name}\n"
-            f"📝 **Msg:** `{msg_text}`"
+            "🚀 #𝐄𝐝𝐢𝐭_𝐄𝐯𝐞𝐧𝐭\n"
+            f"👥 **𝐆𝐫𝐨𝐮𝐩:** `{chat.title}`\n"
+            f"👤 **𝐔𝐬𝐞𝐫:** {sender_name}\n"
+            f"📝 **𝐌𝐬𝐠:** `{msg_text}`"
         )
         await send_log(log_text)
+    except Exception as e:
+        print(f"Error: {e}")
 
-# --- ADVANCED BROADCAST (LINKS & MEDIA) ---
+# --- ADVANCED BROADCAST ---
 @client.on(events.NewMessage(pattern='/broadcast'))
 async def broadcast(event):
     if event.sender_id != OWNER_ID: return
     reply = await event.get_reply_message()
-    if not reply: return await event.reply("❗ **𝐏𝐥𝐞𝐚𝐬𝐞 𝐫𝐞𝐩𝐥𝐲 𝐭𝐨 𝐚 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 (𝐥𝐢𝐧𝐤, 𝐢𝐦𝐠, 𝐨𝐫 𝐭𝐞𝐱𝐭) 𝐭𝐨 𝐛𝐫𝐨𝐚𝐝𝐜𝐚𝐬𝐭.**")
+    if not reply: return await event.reply("❗ **𝐏𝐥𝐞𝐚𝐬𝐞 𝐫𝐞𝐩𝐥𝐲 𝐭𝐨 𝐚 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 𝐭𝐨 𝐛𝐫𝐨𝐚𝐝𝐜𝐚𝐬𝐭.**")
     
     status = await event.reply("📡 **𝐁𝐫𝐨𝐚𝐝𝐜𝐚𝐬𝐭𝐢𝐧𝐠...**")
     count = 0
     for uid in list(users_list):
         try:
-            # Full copy broadcast
             await client.send_message(uid, reply)
             count += 1
             await asyncio.sleep(0.3)
