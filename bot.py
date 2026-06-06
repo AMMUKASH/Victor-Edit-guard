@@ -16,13 +16,13 @@ BOT_TOKEN = "8785307171:AAE6ox5IfylJONaBDDM0nr8j0clGizreRwI"
 LOG_GROUP = -1003947649552
 START_IMG = "https://files.catbox.moe/9eooj2.jpg"
 
-# 🌐 MONGODB CONNECTION (YOUR LIVE DATABASE)
+# 🌐 MONGODB CONNECTION
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://misssqn_db_user:Nova01@cluster0.6xxsrwq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 # Buttons Links
 SUPPORT_URL = "https://t.me/Genu_Bot_Support"
 UPDATE_URL = "https://t.me/Edit_Guardian_Update"
-OWNER_URL = "https://t.me/your_owner_username"  # 👈 यहाँ अपना टेलीग्राम यूजरनेम डालें
+OWNER_URL = "https://t.me/CoderNova"  # 👈 आपकी ओनर आईडी सेट कर दी गई है
 
 # ==========================================================
 # 🗄️ DATABASE SETTINGS (MONGODB)
@@ -99,7 +99,7 @@ async def send_log(client: Client, text: str):
 # ==========================================================
 START_BUTTONS = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝖾𝗌", url=UPDATE_URL),
+        InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌", url=UPDATE_URL),
         InlineKeyboardButton("💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍", url=SUPPORT_URL)
     ],
     [
@@ -119,13 +119,11 @@ BACK_BUTTON = InlineKeyboardMarkup([
 # 📢 PUBLIC & PRIVATE COMMANDS HANDLERS
 # ==========================================================
 
-# /start Command (Works Everywhere)
 @app.on_message(filters.command("start"))
 async def start_cmd(client: Client, message: Message):
     await add_chat(message.chat.id)
-    
     caption = (
-        "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺 𝖡𝗈𝗍 ✨\n\n"
+        "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
         "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
         "👤 **𝖴𝗌𝖾𝗋:** {mention}\n\n"
         "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
@@ -137,39 +135,34 @@ async def start_cmd(client: Client, message: Message):
     else:
         await message.reply_text("👋 𝖧𝖾||𝗈! 𝖨 𝖺𝗆 𝖺|𝗂𝗏𝖾 𝖺𝗇𝖽 𝗐𝗈𝗋𝗄𝗂𝗇𝗀. 𝖯|𝖾𝖺𝗌𝖾 𝖯𝖬 𝗆𝖾 𝖿𝗈𝗋 𝗆𝗈𝗋𝖾 𝗂𝗇𝖿𝗈.", reply_markup=START_BUTTONS)
 
-# /help Command (Works Everywhere)
 @app.on_message(filters.command("help"))
 async def help_cmd(client: Client, message: Message):
     help_text = (
-        "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨ANIA 𝖦𝖴𝖨𝖣𝖤**\n\n"
-        "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𝗀𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
-        "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-        "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𝖦𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𝗐𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𝗒𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
+        "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
+        "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𝗀𝗋𝗈𝗎𝗉 <span>𝗆𝖾</span> 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
+        "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 <span>𝖽𝖾𝗂𝗇.</span>\n"
+        "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𝖦𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𝗐𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𝗒𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 <span>𝖽𝖾|𝖾𝗍𝖾</span> 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
     )
     await message.reply_text(help_text, reply_markup=BACK_BUTTON)
 
-# ==========================================================
-# 🎛️ CALLBACK QUERY HANDLER FOR INLINE MENUS
-# ==========================================================
 @app.on_callback_query()
 async def callback_handler(client: Client, query):
     if query.data == "help_guide":
         help_text = (
             "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
-            "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𝗀𝗋𝗈𝗎𝗉 <span>𝗆𝖾</span> 𝖺𝖽𝖽 <li>𝗄𝖺𝗋𝖾𝗂𝗇.</li>\n"
-            "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** <b>𝗄𝗂</b> 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𝖦𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𝗐𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
+            "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𝗀𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
+            "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
+            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𝖦𝗋𝗈𝗎𝗉 <span>𝗆𝖾</span> <span>𝗄𝗈𝗂</span> 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𝗐𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𝗒𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 <span>𝗄𝖺𝗋𝖾𝗀𝖺,</span> 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
         )
         try:
             await query.message.edit_caption(caption=help_text, reply_markup=BACK_BUTTON)
         except Exception:
             await query.message.edit_text(text=help_text, reply_markup=BACK_BUTTON)
-    
     elif query.data == "back_start":
         caption = (
             "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
-            "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
-            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
+            "🛡️ 𝖨 𝖺𝗆 <span>𝗁𝖾𝗋𝖾</span> 𝗍𝗈 𝗉typed𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
+            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 <b>𝗄𝗇𝗈𝗐</b> 𝗁𝗈𝗐 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
         )
         try:
             await query.message.edit_caption(caption=caption, reply_markup=START_BUTTONS)
@@ -182,13 +175,11 @@ async def callback_handler(client: Client, query):
 @app.on_message(filters.command("broadcast"))
 async def broadcast_cmd(client: Client, message: Message):
     if not message.reply_to_message:
-        await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 𝗋𝖾𝗉|𝗒 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋oa𝖽𝖼𝖺𝗌𝗍!")
+        await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 𝗋𝖾𝗉|𝗒 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍!")
         return
         
     msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𝗉𝗋𝗈𝗀𝗋𝖾𝗌𝗌...")
     success = 0
-    
-    # मोंगोडीबी डेटाबेस से लाइव ग्रुप्स लाएं
     all_chats = await get_all_chats()
     
     for chat_id in all_chats:
@@ -200,13 +191,12 @@ async def broadcast_cmd(client: Client, message: Message):
                 pass
             success += 1
         except Exception:
-            # अगर बॉट रिमूव हो चुका है तो डेटाबेस क्लीनअप करें
             await remove_chat(chat_id)
             
     await msg.edit_text(f"📢 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾𝖽!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
 
 # ==========================================================
-# 🔔 SERVICE LOGS SYSTEM (AddMe, Start, Leave)
+# 🔔 SERVICE LOGS SYSTEM
 # ==========================================================
 @app.on_message(filters.new_chat_members)
 async def service_add_log(client: Client, message: Message):
@@ -233,13 +223,12 @@ async def service_leave_log(client: Client, message: Message):
         await send_log(client, log_text)
 
 # ==========================================================
-# 🔥 EDIT GUARDIAN CORE FUNCTION (BEST PRE-VIP DESIGN)
+# 🔥 EDIT GUARDIAN CORE FUNCTION
 # ==========================================================
 @app.on_edited_message(filters.group)
 async def handle_edited_message(client: Client, message: Message):
     try:
         await add_chat(message.chat.id)
-        
         user = message.from_user
         mention = user.mention if user else "𝖴𝗇𝗄𝗇𝗈𝗐𝗇 𝖴𝗌𝖾𝗋"
         username = f"@{user.username}" if user and user.username else "𝖭𝗈 𝖴𝗌𝖾𝗋𝗇𝖺𝗆𝖾"
@@ -249,7 +238,7 @@ async def handle_edited_message(client: Client, message: Message):
             f"   🚨 **𝖤𝖣𝖨𝖳  𝖣𝖤𝖳𝖤𝖢𝖳𝖤𝖣  𝖠𝖫𝖤𝖱𝖳** 🚨\n"
             f"╚══════════════════════╝\n\n"
             f"🚫 **𝖧𝖾𝗒 {mention}, 𝖤𝖽𝗂𝗍𝗂𝗇𝗀 𝗆𝖾𝗌𝗌𝖺𝗀𝖾𝗌 𝗂𝗌 𝗌𝗍𝗋𝗂𝖼|𝗒**\n"
-            f"**𝗉𝗋𝗈𝗁𝗂𝖻𝗂𝗍𝖾𝖽 𝖻𝖾|𝗈𝗐 𝖽𝗎𝖾 𝗍𝗈 𝖼𝗈𝗉𝗒𝗋𝗂𝗀𝗁𝗍 & 𝗌𝖺𝖿𝖾𝗍𝗒!**\n\n"
+            f"**𝗉𝗋𝗈𝗁𝗂𝖻𝗂𝗍𝖾𝖽 𝖻𝖾|𝗈𝗐 𝖽𝗎𝖾 𝗍𝗈 𝖼𝗈𝗉𝗒𝗋𝗂𝗀𝗁 & 𝗌𝖺𝖿𝖾𝗍𝗒!**\n\n"
             f"📝 **𝖴𝗌𝖾𝗋 𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇:**\n"
             f"  » 👤 **𝖭𝖺𝗆𝖾:** {mention}\n"
             f"  » 🌐 **𝖴𝗌𝖾𝗋𝗇𝖺𝗆𝖾:** {username}\n"
@@ -277,14 +266,24 @@ async def handle_edited_message(client: Client, message: Message):
         print(f"VIP Edit Handler Error: {e}")
 
 # ==========================================================
-# RUN APPLICATION WITH PROPER ASYNCIO LOOP FOR PYTHON 3.14+
+# 🚀 ADVANCED PYTHON 3.14+ MAIN LIFECYCLE HANDLER
 # ==========================================================
 async def main():
+    # Flask सर्वर को थ्रेड में चलाएं
     threading.Thread(target=run_server, daemon=True).start()
-    print("✨ @EditXguardbot is starting up successfully...")
+    
+    print("✨ @EditXguardbot is running on Python 3.14+ environment...")
+    
+    # Pyrogram को एसिंक्रोनस लाइफसाइकिल के साथ बाइंड करना
     await app.start()
     await idle()
     await app.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # नया क्लीन लूप बनाकर सेट करना ताकि 'no current event loop' कभी न आए
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(main())
+    finally:
+        loop.close()
