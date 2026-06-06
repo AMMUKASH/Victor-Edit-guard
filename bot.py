@@ -4,18 +4,17 @@ import asyncio
 import datetime
 from aiohttp import web
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
 from pymongo import MongoClient
 from config import API_ID, API_HASH, BOT_TOKEN, LOG_GROUP, PORT, START_IMG, BOT_USERNAME, UPDATE_CH, SUPPORT_CH, OWNER_ID, OWNER_USERNAME
 
-# MongoDB Connection Configuration with Fallback
+# MongoDB Connection Configuration with Your Exact Fallback
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://misssqn_db_user:Nova01@cluster0.6xxsrwq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 # Database Setup
 mongo_client = MongoClient(MONGO_URL)
 db = mongo_client["NovaDB"]
-warns_col = db["user_warns"]
 users_col = db["registered_users"]  
 groups_col = db["registered_groups"]  
 
@@ -38,8 +37,6 @@ START_TXT = """
 │ 🛡️ **<b>ᴄᴏʀᴇ ғᴇᴀᴛᴜʀᴇs :</b>**
 ├───────────────────────┤
 │ 👤 **ʙɪᴏ sᴄᴀɴɴᴇʀ:** Automated Bio Scan
-│ ⚠️ **ᴡᴀʀɴ sʏsᴛᴇᴍ:** Strict 3-Warn Logic
-│ 🔇 **ᴀᴜᴛᴏ-ᴍᴜᴛᴇ:** Permanent Mute on 3/3
 │ 🗑️ **ᴍᴇssᴀɢᴇ ᴅᴇʟᴇᴛᴇ:** Instant Clean Up
 └───────────────────────┘
 
@@ -61,9 +58,7 @@ HELP_TXT = """
 🔹 `/broadcast` - Send alert to database (Owner Only)
 
 ⚙️ **ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs:**
-⚠️ **🟪sᴛ ᴠɪᴏʟᴀᴛɪᴏɴ:** Message Delete + 1st Warning.
-⚠️ **🟨ɴᴅ ᴠɪᴏʟᴀᴛɪᴏɴ:** Message Delete + 2nd Warning.
-🚫 **🟥ʀᴅ ᴠɪᴏʟᴀᴛɪᴏɴ:** Message Delete + **ᴜsᴇʀ ᴍᴜᴛᴇᴅ ᴘᴇʀᴍᴀɴᴇɴᴛʟʏ!**
+⚠️ **ᴠɪᴏʟᴀᴛɪᴏɴ:** Agar kisi user ki Bio me Link mila, toh bot uske message ko **ɪɴsᴛᴀɴᴛ ᴅᴇʟᴇᴛᴇ** kar dega.
 
 💡 *ɴᴏᴛᴇ: Group Admins aur Creator par security filter run nahi hota.*
 """
@@ -71,7 +66,7 @@ HELP_TXT = """
 MAIN_BUTTONS = InlineKeyboardMarkup([
     [InlineKeyboardButton("🤖 ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ 🤖", url=f"https://t.me/{BOT_USERNAME}?startgroup=true")],
     [InlineKeyboardButton("👑 ᴏᴡɴᴇʀ", url=f"https://t.me/{OWNER_USERNAME}"),
-     InlineKeyboardButton("⚙️ ʜᴇʟᴘ & ᴄᴏᴍᴍᴀɴ─ᴅs", callback_data="help_menu")],
+     InlineKeyboardButton("⚙️ ʜᴇʟᴘ & ᴄᴏᴍᴍᴀɴᴅs", callback_data="help_menu")],
     [InlineKeyboardButton("🔕 ᴜᴘᴅᴀᴛᴇ", url=f"https://t.me/{UPDATE_CH}"),
      InlineKeyboardButton("💌 sᴜᴘᴘᴏʀᴛ", url=f"https://t.me/{SUPPORT_CH}")]
 ])
@@ -121,23 +116,12 @@ async def help_cmd(client, message: Message):
 @bot.on_callback_query()
 async def callback_handler(client, query):
     user = query.from_user
-    chat_id = query.message.chat.id
     if query.data == "help_menu":
         try: await query.message.edit_caption(caption=HELP_TXT, reply_markup=BACK_BUTTON)
         except: await query.message.edit_text(text=HELP_TXT, reply_markup=BACK_BUTTON)
     elif query.data == "back_home":
         try: await query.message.edit_caption(caption=START_TXT.format(mention=user.mention), reply_markup=MAIN_BUTTONS)
         except: await query.message.reply_text(text=START_TXT.format(mention=user.mention), reply_markup=MAIN_BUTTONS)
-    elif query.data.startswith("reset_"):
-        target_id = int(query.data.split("_")[1])
-        if await is_user_admin(chat_id, user.id):
-            warns_col.delete_one({"user_id": target_id, "chat_id": chat_id})
-            await query.answer("🔄 Warn Count Reset Successfully!", show_alert=True)
-            await query.message.edit_text(f"✅ {user.mention} ɴᴇ ᴜsᴇʀ ᴋᴇ ᴡᴀʀɴs ʀᴇsᴇᴛ ᴋᴀʀ ᴅɪʏᴇ.")
-        else:
-            await query.answer("❌ Yeh action sirf group admins ke liye hai!", show_alert=True)
-    elif query.data == "whitelist_info":
-        await query.answer("⚪ Whitelist hone ke liye user ko apne bio se link hatana hoga.", show_alert=True)
 
 # Tracking Bot addition to groups
 @bot.on_message(filters.new_chat_members)
@@ -151,9 +135,9 @@ async def bot_added_to_chat(client, message: Message):
             try: await bot.send_message(chat_id=LOG_GROUP, text=log_msg)
             except: pass
 
-# Core Anti-Bio Link Logic
+# Core Anti-Bio Link Logic (SILENT MESSAGE DELETE + ALERT BUTTONS)
 @bot.on_message(filters.group & ~filters.service)
-async def check_bio_and_warn(client, message: Message):
+async def check_bio_and_delete(client, message: Message):
     if not message.from_user: return
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -175,40 +159,20 @@ async def check_bio_and_warn(client, message: Message):
         print(f"📝 [SCANNER] User Bio text resolved: '{bio}'")
 
         if bio and URL_PATTERN.search(bio):
-            print(f"⚠️ [SCANNER] Match found! Bio contains spam link. Executing cleanup...")
+            print(f"⚠️ [SCANNER] Match found! Bio contains spam link. Deleting message...")
             await message.delete()
             
-            warn_data = warns_col.find_one({"user_id": user_id, "chat_id": chat_id})
-            warn_count = 1 if not warn_data else warn_data["count"] + 1
-            
-            if not warn_data: 
-                warns_col.insert_one({"user_id": user_id, "chat_id": chat_id, "count": warn_count})
-            else: 
-                warns_col.update_one({"user_id": user_id, "chat_id": chat_id}, {"$set": {"count": warn_count}})
-
-            warn_buttons = InlineKeyboardMarkup([
-                [InlineKeyboardButton("🤖 ᴀᴅᴅ ᴍᴇ 🤖", url=f"https://t.me/{BOT_USERNAME}?startgroup=true"),
-                 InlineKeyboardButton("⚪ ᴡʜɪᴛᴇʟɪsᴛ", callback_data="whitelist_info")],
-                [InlineKeyboardButton("🔄 ʀᴇsᴇᴛ ᴡᴀʀɴ", callback_data=f"reset_{user_id}"),
-                 InlineKeyboardButton("🔕 ᴜᴘᴅᴀᴛᴇ", url=f"https://t.me/{UPDATE_CH}")]
+            # Action Buttons: Add Me + Update + Support
+            action_buttons = InlineKeyboardMarkup([
+                [InlineKeyboardButton("🤖 ᴀᴅᴅ ᴍᴇ 🤖", url=f"https://t.me/{BOT_USERNAME}?startgroup=true")],
+                [InlineKeyboardButton("🔕 ᴜᴘᴅᴀᴛᴇ", url=f"https://t.me/{UPDATE_CH}"),
+                 InlineKeyboardButton("💌 sᴜᴘᴘᴏʀᴛ", url=f"https://t.me/{SUPPORT_CH}")]
             ])
 
-            if warn_count < 3:
-                await message.reply_text(
-                    text=f"⚠️ ⚡ **ʙɪᴏ ʟɪɴᴋ ᴅᴇᴛᴇᴄᴛᴇᴅ** ⚡ ⚠️\n\n👤 **ᴜsᴇʀ:** {message.from_user.mention}\n🆔 **ᴜsᴇʀ ɪᴅ:** `{user_id}`\n👥 **ɢʀᴏᴜᴘ:** `{chat_title}`\n🚫 **ᴡᴀʀɴɪɴɢ:** `{warn_count}/3`\n📝 **ʀᴇᴀsᴏɴ:** Link in Bio.",
-                    reply_markup=warn_buttons
-                )
-            else:
-                await client.restrict_chat_member(chat_id, user_id, ChatPermissions(can_send_messages=False))
-                warns_col.delete_one({"user_id": user_id, "chat_id": chat_id})
-                mute_buttons = InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🤖 ᴀᴅᴅ ᴍᴇ 🤖", url=f"https://t.me/{BOT_USERNAME}?startgroup=true")],
-                    [InlineKeyboardButton("🔕 ᴜᴘᴅᴀᴛᴇ", url=f"https://t.me/{UPDATE_CH}"), InlineKeyboardButton("💌 sᴜᴘᴘᴏʀᴛ", url=f"https://t.me/{SUPPORT_CH}")]
-                ])
-                await message.reply_text(
-                    text=f"🚫 🛑 **ᴜsᴇʀ ᴍᴜᴛᴇᴅ ᴘᴇʀᴍᴀɴᴇɴᴛʟʏ** 🛑 🚫\n\n👤 **ᴜsᴇʀ:** {message.from_user.mention}\n🆔 **ɪᴅ:** `{user_id}`\n👥 **ɢʀᴏᴜᴘ:** `{chat_title}`\n❌ **ʀᴇᴀsᴏɴ:** Exceeded Bio Warnings (3/3).",
-                    reply_markup=mute_buttons
-                )
+            await message.reply_text(
+                text=f"⚠️ ⚡ **ᴍᴇssᴀɢᴇ ᴅᴇʟᴇᴛᴇᴅ** ⚡ ⚠️\n\n👤 **ᴜsᴇʀ:** {message.from_user.mention}\n🆔 **ᴜsᴇʀ ɪᴅ:** `{user_id}`\n👥 **ɢʀᴏᴜᴘ:** `{chat_title}`\n📝 **ʀᴇᴀsᴏɴ:** Link detected in user Bio. Message removed silently.",
+                reply_markup=action_buttons
+            )
     except Exception as e:
         print(f"❌ [SCANNER ERROR] Failed to evaluate bio logic: {e}")
 
@@ -271,7 +235,6 @@ async def main():
     await bot.start()
     print("🤖 Bot is successfully online!")
     
-    # Active web runner configuration targeting Render binding port
     app = web.Application()
     app.router.add_get('/', web_handle)
     runner = web.AppRunner(app)
@@ -280,9 +243,12 @@ async def main():
     await site.start()
     print(f"📡 Web Server tightly bound and active on port {PORT}")
     
-    # Keeps loop active indefinitely
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    try:
+        asyncio.run(main())
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(main())
