@@ -237,24 +237,34 @@ async def service_leave_log(client: Client, message: Message):
 # ==========================================================
 @app.on_edited_message(filters.group)
 async def handle_edited_message(client: Client, message: Message):
+    # 1. जाँचें कि क्या वास्तव में टेक्स्ट बदला है
+    # अगर रिएक्शन बदला है, तो 'text' या 'caption' पुराने और नए में समान रहेंगे
+    # केवल टेक्स्ट/कैप्शन बदलने पर ही यह ट्रिगर होगा
+    
+    # यह चेक सुनिश्चित करता है कि यह सिर्फ रिएक्शन का एडिट नहीं है
+    if not message.text and not message.caption:
+        return
+
     try:
         await add_chat(message.chat.id)
         user = message.from_user
-        mention = user.mention if user else "𝖴𝗇𝗄𝗇𝗈𝗐𝗇 𝖴𝗌𝖾𝗋"
-        username = f"@{user.username}" if user and user.username else "𝖭𝗈 𝖴𝗌𝖾𝗋𝗇𝖺𝗆𝖾"
+        if not user: return # अगर सिस्टम मैसेज है तो इग्नोर करें
+        
+        mention = user.mention
+        username = f"@{user.username}" if user.username else "No Username"
         
         text = (
             f"╔══════════════════════╗\n"
-            f"   🚨 **𝖤𝖣𝖨𝖳  𝖣𝖤𝖳𝖤𝖢𝖳𝖤𝖣  𝖠𝖫𝖤𝖱𝖳** 🚨\n"
+            f"   🚨 **𝐄𝐃𝐈𝐓  𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃  𝐀𝐋𝐄𝐑𝐓** 🚨\n"
             f"╚══════════════════════╝\n\n"
-            f"🚫 **𝖧𝖾𝗒 {mention}, 𝖤edit𝗂𝗇𝗀 𝗆𝖾𝗌𝗌𝖺𝗀𝖾𝗌 𝗂𝗌 𝗌𝗍𝗋𝗂𝖼|𝗒**\n"
-            f"**𗗗𝗋𝗈𝗁𝗂𝖻𝗂𝗍𝖾𝖽 𝖻𝖾|𝗈𝗐 𝖽𝗎𝖾 𝗍𝗈 𝖼𝗈𝗉𝗒𝗋𝗂𝗀𝗁𝗍 & 𝗌𝖺𝖿𝖾𝗍𝗒!**\n\n"
-            f"📝 **𝖴𝗌𝖾𝗋 𝖨𝗇𝖿𝗈𝗋𝗆𝖺𝗍𝗂𝗈𝗇:**\n"
-            f"  » 👤 **𝖭𝖺𝗆𝖾:** {mention}\n"
-            f"  » 🌐 **𝖴𝗌𝖾𝗋𝗇𝖺𝗆𝖾:** {username}\n"
-            f"  » 🆔 **𝖴𝗌𝖾𝗋 𝖨𝖣:** `{user.id if user else '𝖭/𝖠'}`\n\n"
-            f"🗑️ `𝖸𝗈𝗎𝗋 𝗈𝗋𝗂𝗀𝗂𝗇𝖺| 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗁𝖺𝗌 𝖻𝖾𝖾𝗇 𝖽𝖾|𝖾𝗍𝖾𝖽.`\n\n"
-            f"⏳ __𝖳𝗁𝗂𝗌 𝗐𝖺𝗋𝗇𝗂𝗇𝗀 𗗗𝗂𝗅𝗅 𝖺𝗎𝗍𝗈-𝖽𝖾|𝖾𝗍𝖾 𝗂𝗇 𝟨𝟢𝗌.__\n"
+            f"🚫 **Hey {mention}, Editing messages is strictly**\n"
+            f"**prohibited due to copyright & safety!**\n\n"
+            f"📝 **User Information:**\n"
+            f"  » 👤 **Name:** {mention}\n"
+            f"  » 🌐 **Username:** {username}\n"
+            f"  » 🆔 **User ID:** `{user.id}`\n\n"
+            f"🗑️ `Your original message has been deleted.`\n\n"
+            f"⏳ __This warning will auto-delete in 60s.__\n"
             f"━━━━━━━━━━━━━━━━━━━━━━━"
         )
         
@@ -268,12 +278,17 @@ async def handle_edited_message(client: Client, message: Message):
             ]
         ])
         
+        # मैसेज डिलीट करें
         await delete_msg(message)
+        
+        # वार्निंग भेजें
         warning_msg = await client.send_message(chat_id=message.chat.id, text=text, reply_markup=buttons)
+        
+        # 60 सेकंड बाद डिलीट करें
         asyncio.create_task(delete_after_delay(warning_msg, 60))
         
     except Exception as e:
-        print(f"VIP Edit Handler Error: {e}")
+        print(f"Edit Handler Error: {e}")
 
 # ==========================================================
 # 🚀 CORE ENTRYPOINT
