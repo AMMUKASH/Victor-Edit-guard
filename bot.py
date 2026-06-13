@@ -69,7 +69,7 @@ server = Flask(__name__)
 
 @server.route('/')
 def home():
-    return "𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 𝗂𝗌 𝖠|𝗂𝗏𝖾 𝖺𝗇𝖽 𝖱𝗎𝗇𝗇𝗂𝗇𝗀!"
+    return "𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺 𝖡𝗈𝗍 𝗂𝗌 𝖠|𝗂𝗏𝖾 𝖺𝗇𝖽 𝖱𝗎𝗇𝗇𝗂𝗇𝗀!"
 
 def run_server():
     port = int(os.environ.get("PORT", 8080))
@@ -122,7 +122,7 @@ START_BUTTONS = InlineKeyboardMarkup([
 ])
 
 BACK_BUTTON = InlineKeyboardMarkup([
-    [InlineKeyboardButton("🔙 𝖡𝖺𝖼𝗄 𝖳𝗈 𝖬𝖾𝗇𝑢", callback_data="back_start")]
+    [InlineKeyboardButton("🔙 𝖡𝖺𝖼 𝖳𝗈 𝖬𝖾𝗇𝑢", callback_data="back_start")]
 ])
 
 # ==========================================================
@@ -135,7 +135,7 @@ async def start_cmd(client: Client, message: Message):
     caption = (
         "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
         "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
-        "👤 **𝖴𝗌𝖾𝗋:** {mention}\n\n"
+        "👤 **𝖴𝗌𝖾rer:** {mention}\n\n"
         "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 <b>𝗄𝗇𝗈𝗐</b> <b>𝗁𝗈𝗐</b> 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
     ).format(mention=message.from_user.mention if message.from_user else "𝖴𝗌𝖾𝗋")
     
@@ -162,7 +162,7 @@ async def callback_handler(client: Client, query):
             "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
             "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
             "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𝗐𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𝗒𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 <b>𝗄𝖺𝗋</b> 𝖽𝖾𝗀𝖺."
+            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𝗒𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 <b>𝗄𝖺𝗋</b> 𝖽𝖾𝗀𝖺."
         )
         try:
             await query.message.edit_caption(caption=help_text, reply_markup=BACK_BUTTON)
@@ -171,8 +171,8 @@ async def callback_handler(client: Client, query):
     elif query.data == "back_start":
         caption = (
             "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
-            "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
-            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍调𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 <span>𝗌𝖾𝗍</span> 𝗆𝖾 𝗎𝗉."
+            "🛡️ 𝖨 𝖺𝗆 //𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
+            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
         )
         try:
             await query.message.edit_caption(caption=caption, reply_markup=START_BUTTONS)
@@ -188,7 +188,7 @@ async def broadcast_cmd(client: Client, message: Message):
         await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 𝗋𝖾𝗉|𝗒 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍!")
         return
         
-    msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𝗉𝗋𝗈𝗀𝗋𝖾𝗌𝗌...")
+    msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𝗉𝗋𝗈𝗀𝗋𝖾𝗌..." )
     success = 0
     all_chats = await get_all_chats()
     
@@ -203,7 +203,7 @@ async def broadcast_cmd(client: Client, message: Message):
         except Exception:
             await remove_chat(chat_id)
             
-    await msg.edit_text(f"📢 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾𝖽!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
+    await msg.edit_text(f"📢 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾Completed!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
 
 # ==========================================================
 # 🔔 SERVICE LOGS SYSTEM
@@ -233,15 +233,16 @@ async def service_leave_log(client: Client, message: Message):
         await send_log(client, log_text)
 
 # ==========================================================
-# 🔥 EDIT GUARDIAN CORE FUNCTION
+# 🔥 EDIT GUARDIAN CORE FUNCTION (UPDATED)
 # ==========================================================
 @app.on_edited_message(filters.group)
 async def handle_edited_message(client: Client, message: Message):
-    # 1. जाँचें कि क्या वास्तव में टेक्स्ट बदला है
-    # अगर रिएक्शन बदला है, तो 'text' या 'caption' पुराने और नए में समान रहेंगे
-    # केवल टेक्स्ट/कैप्शन बदलने पर ही यह ट्रिगर होगा
-    
-    # यह चेक सुनिश्चित करता है कि यह सिर्फ रिएक्शन का एडिट नहीं है
+    # 🌟 मुख्य सुधार (Fix): अगर मैसेज में edit_date नहीं है, तो इसका मतलब यह सिर्फ रिएक्शन अपडेट है।
+    # टेलीग्राम रिएक्शन चेंज होने पर edit_date को अपडेट नहीं करता।
+    if not message.edit_date:
+        return
+
+    # सुरक्षित रहने के लिए चेक करें कि क्या टेक्स्ट या कैप्शन में कुछ है
     if not message.text and not message.caption:
         return
 
