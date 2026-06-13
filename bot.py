@@ -11,6 +11,7 @@ except RuntimeError:
 # अब सारे इम्पोर्ट्स सेफली काम करेंगे
 import os
 import threading
+from collections import deque
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.methods.utilities.idle import idle
@@ -33,6 +34,26 @@ MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://misssqn_db_user:Nova01@cl
 SUPPORT_URL = "https://t.me/Genu_Bot_Support"
 UPDATE_URL = "https://t.me/Edit_Guardian_Update"
 OWNER_URL = "https://t.me/CoderNova"
+
+# ==========================================================
+# 🧠 MEMORY CACHE SYSTEM (50,000 MESSAGES CAPACITY)
+# ==========================================================
+# 50k मैसेजेस ट्रैक करने के लिए एडवांस्ड और फ़ास्ट FIFO (First-In-First-Out) कैशिंग।
+CACHE_MAX_SIZE = 50000
+MESSAGE_TEXT_CACHE = {}
+CACHE_KEYS_TRACKER = deque()
+
+def add_to_cache(cache_key, text):
+    # अगर की (Key) पहले से नहीं है, तो ट्रैकर में जोड़ें
+    if cache_key not in MESSAGE_TEXT_CACHE:
+        CACHE_KEYS_TRACKER.append(cache_key)
+    
+    MESSAGE_TEXT_CACHE[cache_key] = text
+    
+    # जैसे ही लिमिट 50,000 पार होगी, सबसे पुराना मैसेज खुद-ब-खुद हट जाएगा
+    if len(CACHE_KEYS_TRACKER) > CACHE_MAX_SIZE:
+        oldest_key = CACHE_KEYS_TRACKER.popleft()
+        MESSAGE_TEXT_CACHE.pop(oldest_key, None)
 
 # ==========================================================
 # 🗄️ DATABASE SETTINGS (MONGODB)
@@ -69,7 +90,7 @@ server = Flask(__name__)
 
 @server.route('/')
 def home():
-    return "𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺 𝖡𝗈𝗍 𝗂𝗌 𝖠|𝗂𝗏𝖾 𝖺𝗇𝖽 𝖱𝗎𝗇𝗇𝗂𝗇𝗀!"
+    return "𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 𝗂𝗌 𝖠|𝗂𝗏𝖾 𝖺𝗇𝖽 𝖱𝗎𝗇𝗇𝗂𝗇𝗀!"
 
 def run_server():
     port = int(os.environ.get("PORT", 8080))
@@ -122,20 +143,28 @@ START_BUTTONS = InlineKeyboardMarkup([
 ])
 
 BACK_BUTTON = InlineKeyboardMarkup([
-    [InlineKeyboardButton("🔙 𝖡𝖺𝖼 𝖳𝗈 𝖬𝖾𝗇𝑢", callback_data="back_start")]
+    [InlineKeyboardButton("🔙 𝖡𝖺𝖼𝗄 𝖳𝗈 𝖬𝖾𝗇𝑢", callback_data="back_start")]
 ])
 
 # ==========================================================
 # 📢 PUBLIC & PRIVATE COMMANDS HANDLERS
 # ==========================================================
 
+# आने वाले हर नए मैसेज का टेक्स्ट स्टोर करने के लिए (कैपेसिटी: 50,000)
+@app.on_message(filters.group & (filters.text | filters.caption), group=-1)
+async def cache_incoming_messages(client: Client, message: Message):
+    current_text = message.text or message.caption
+    if current_text:
+        cache_key = f"{message.chat.id}_{message.id}"
+        add_to_cache(cache_key, current_text)
+
 @app.on_message(filters.command("start"))
 async def start_cmd(client: Client, message: Message):
     await add_chat(message.chat.id)
     caption = (
         "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
-        "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𝗀𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
-        "👤 **𝖴𝗌𝖾rer:** {mention}\n\n"
+        "🛡️ 𝖨 𝖺𝗆 //𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
+        "👤 **𝖴𝗌𝖾𝗋:** {mention}\n\n"
         "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 <b>𝗄𝗇𝗈𝗐</b> <b>𝗁𝗈𝗐</b> 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
     ).format(mention=message.from_user.mention if message.from_user else "𝖴𝗌𝖾𝗋")
     
@@ -149,9 +178,9 @@ async def start_cmd(client: Client, message: Message):
 async def help_cmd(client: Client, message: Message):
     help_text = (
         "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
-        "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𝗀𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
-        "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-        "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𝖦𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𝗐𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
+        "𝟣. 𝖡𝗈𝗍 <b><b><b><b>𝗄𝗈</b></b></b></b> 𝖺𝗉𝗇𝖾 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
+        "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** <b>𝗄𝗂</b> 𝖺𝖽𝗆𝗂𝗇 𗗗𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
+        "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 <b>𝗄𝗈𝗂</b> 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 <b>𝖽𝖾|𝖾𝗍𝖾</b> 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
     )
     await message.reply_text(help_text, reply_markup=BACK_BUTTON)
 
@@ -161,8 +190,8 @@ async def callback_handler(client: Client, query):
         help_text = (
             "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
             "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
-            "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𝗉𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𝗒𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 <b>𝗄𝖺𝗋</b> 𝖽𝖾𝗀𝖺."
+            "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𗗗𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
+            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 <b>𝗄𝗈𝗂</b> 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 <b>𝗄𝖺𝗋</b> 𝖽𝖾𝗀𝖺."
         )
         try:
             await query.message.edit_caption(caption=help_text, reply_markup=BACK_BUTTON)
@@ -170,9 +199,9 @@ async def callback_handler(client: Client, query):
             await query.message.edit_text(text=help_text, reply_markup=BACK_BUTTON)
     elif query.data == "back_start":
         caption = (
-            "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
-            "🛡️ 𝖨 𝖺𝗆 //𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
-            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
+            "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺...  Bot ✨\n\n"
+            "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𗗗𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
+            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 <b>𝗌𝖾𝗍</b> 𝗆𝖾 𝗎𝗉."
         )
         try:
             await query.message.edit_caption(caption=caption, reply_markup=START_BUTTONS)
@@ -185,10 +214,10 @@ async def callback_handler(client: Client, query):
 @app.on_message(filters.command("broadcast"))
 async def broadcast_cmd(client: Client, message: Message):
     if not message.reply_to_message:
-        await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 𝗋𝖾𝗉|𝗒 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍!")
+        await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 <b>𝗋𝖾𝗉|𝗒</b> 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍!")
         return
         
-    msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𝗉𝗋𝗈𝗀𝗋𝖾𝗌..." )
+    msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𝗉𝗋𝗈𝗀𝗋𝖾𝗌𝗌...")
     success = 0
     all_chats = await get_all_chats()
     
@@ -203,7 +232,7 @@ async def broadcast_cmd(client: Client, message: Message):
         except Exception:
             await remove_chat(chat_id)
             
-    await msg.edit_text(f"📢 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾Completed!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
+    await msg.edit_text(f"📢 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾𝖽!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
 
 # ==========================================================
 # 🔔 SERVICE LOGS SYSTEM
@@ -233,30 +262,33 @@ async def service_leave_log(client: Client, message: Message):
         await send_log(client, log_text)
 
 # ==========================================================
-# 🔥 EDIT GUARDIAN CORE FUNCTION (UPDATED)
+# 🔥 EDIT GUARDIAN CORE FUNCTION (REACTION SAFE + 50K TRACKER)
 # ==========================================================
 @app.on_edited_message(filters.group)
 async def handle_edited_message(client: Client, message: Message):
-    # 🌟 मुख्य सुधार (Fix): अगर मैसेज में edit_date नहीं है, तो इसका मतलब यह सिर्फ रिएक्शन अपडेट है।
-    # टेलीग्राम रिएक्शन चेंज होने पर edit_date को अपडेट नहीं करता।
-    if not message.edit_date:
+    new_text = message.text or message.caption
+    if not new_text:
         return
 
-    # सुरक्षित रहने के लिए चेक करें कि क्या टेक्स्ट या कैप्शन में कुछ है
-    if not message.text and not message.caption:
-        return
+    cache_key = f"{message.chat.id}_{message.id}"
+    
+    # चेक करें कि क्या यह मैसेज मेमोरी कैश में है
+    if cache_key in MESSAGE_TEXT_CACHE:
+        # अगर पुराना टेक्स्ट और नया टेक्स्ट बिल्कुल समान है, तो यह केवल रिएक्शन है (इग्नोर करें)
+        if MESSAGE_TEXT_CACHE[cache_key] == new_text:
+            return
 
     try:
         await add_chat(message.chat.id)
         user = message.from_user
-        if not user: return # अगर सिस्टम मैसेज है तो इग्नोर करें
+        if not user: return # सिस्टम मैसेज को इग्नोर करें
         
         mention = user.mention
         username = f"@{user.username}" if user.username else "No Username"
         
         text = (
             f"╔══════════════════════╗\n"
-            f"   🚨 **𝐄𝐃𝐈𝐓  𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃  𝐀𝐋𝐄𝐑𝐓** 🚨\n"
+            f"   🚨 **𝐄𝐃𝐈𝐓  𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃  𝐀|𝐄𝐑𝐓** 🚨\n"
             f"╚══════════════════════╝\n\n"
             f"🚫 **Hey {mention}, Editing messages is strictly**\n"
             f"**prohibited due to copyright & safety!**\n\n"
@@ -278,6 +310,13 @@ async def handle_edited_message(client: Client, message: Message):
                 InlineKeyboardButton("👑 Contact Owner", url=OWNER_URL)
             ]
         ])
+        
+        # मैसेज डिलीट होने पर कैश मेमोरी से साफ़ करें
+        MESSAGE_TEXT_CACHE.pop(cache_key, None)
+        try:
+            CACHE_KEYS_TRACKER.remove(cache_key)
+        except ValueError:
+            pass
         
         # मैसेज डिलीट करें
         await delete_msg(message)
@@ -302,5 +341,4 @@ async def main():
     await app.stop()
 
 if __name__ == "__main__":
-    # पहले से सेट किए गए लूप पर सीधे मेन फंक्शन रन करें
     loop.run_until_complete(main())
