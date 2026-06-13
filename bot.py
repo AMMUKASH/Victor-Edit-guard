@@ -18,6 +18,9 @@ from pyrogram.methods.utilities.idle import idle
 from flask import Flask
 from motor.motor_asyncio import AsyncIOMotorClient
 
+# raw updates हैंडल करने के लिए इम्पोर्ट्स (रिएक्शन ब्लॉक करने के लिए)
+from pyrogram.raw.types import UpdateEditMessage, UpdateEditChannelMessage
+
 # ==========================================================
 # 🛑 CREDENTIALS & CONFIGURATION
 # ==========================================================
@@ -38,19 +41,16 @@ OWNER_URL = "https://t.me/CoderNova"
 # ==========================================================
 # 🧠 MEMORY CACHE SYSTEM (50,000 MESSAGES CAPACITY)
 # ==========================================================
-# 50k मैसेजेस ट्रैक करने के लिए एडवांस्ड और फ़ास्ट FIFO (First-In-First-Out) कैशिंग।
 CACHE_MAX_SIZE = 50000
 MESSAGE_TEXT_CACHE = {}
 CACHE_KEYS_TRACKER = deque()
 
 def add_to_cache(cache_key, text):
-    # अगर की (Key) पहले से नहीं है, तो ट्रैकर में जोड़ें
     if cache_key not in MESSAGE_TEXT_CACHE:
         CACHE_KEYS_TRACKER.append(cache_key)
     
     MESSAGE_TEXT_CACHE[cache_key] = text
     
-    # जैसे ही लिमिट 50,000 पार होगी, सबसे पुराना मैसेज खुद-ब-खुद हट जाएगा
     if len(CACHE_KEYS_TRACKER) > CACHE_MAX_SIZE:
         oldest_key = CACHE_KEYS_TRACKER.popleft()
         MESSAGE_TEXT_CACHE.pop(oldest_key, None)
@@ -90,7 +90,7 @@ server = Flask(__name__)
 
 @server.route('/')
 def home():
-    return "𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 𝗂𝗌 𝖠|𝗂𝗏𝖾 𝖺𝗇𝖽 𝖱𝗎𝗇𝗇𝗂𝗇𝗀!"
+    return "𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 𝗂𝗌 𝖠|𝗂𝗏𝖾 𝖺𝗇𝖽 𝖱𝗎𝗇𝗇𝗂่น𝗀!"
 
 def run_server():
     port = int(os.environ.get("PORT", 8080))
@@ -130,7 +130,7 @@ async def send_log(client: Client, text: str):
 # ==========================================================
 START_BUTTONS = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌", url=UPDATE_URL),
+        InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝖾𝗌", url=UPDATE_URL),
         InlineKeyboardButton("💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍", url=SUPPORT_URL)
     ],
     [
@@ -138,7 +138,7 @@ START_BUTTONS = InlineKeyboardMarkup([
         InlineKeyboardButton("👑 𝖮𝗐𝗇𝖾𝗋", url=OWNER_URL)
     ],
     [
-        InlineKeyboardButton("➕ 𝖠𝖽𝖽 𝖬𝖾 𝖳𝗈 𝖸𝗈𝗎𝗋 𝖦𝗋𝗈𝗎𝗉", url="https://t.me/EditXguardbot?startgroup=true")
+        InlineKeyboardButton("➕ 𝖠𝖽𝖽 𝖬𝖾 𝖳𝗈 𝖸𝗈𝗎𝗋 𝖦𝗋ᅩ𝗎𝗉", url="https://t.me/EditXguardbot?startgroup=true")
     ]
 ])
 
@@ -150,8 +150,8 @@ BACK_BUTTON = InlineKeyboardMarkup([
 # 📢 PUBLIC & PRIVATE COMMANDS HANDLERS
 # ==========================================================
 
-# आने वाले हर नए मैसेज का टेक्स्ट स्टोर करने के लिए (कैपेसिटी: 50,000)
-@app.on_message(filters.group & (filters.text | filters.caption), group=-1)
+# आने वाले हर नए मैसेज का टेक्स्ट स्टोर करने के लिए
+@app.on_message(filters.group & (filters.text | filters.caption) & ~filters.bot, group=-1)
 async def cache_incoming_messages(client: Client, message: Message):
     current_text = message.text or message.caption
     if current_text:
@@ -163,7 +163,7 @@ async def start_cmd(client: Client, message: Message):
     await add_chat(message.chat.id)
     caption = (
         "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
-        "🛡️ 𝖨 𝖺𝗆 //𝗁𝖾𝗋𝖾 𝗍𝗈 𝗉𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
+        "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𗗗𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
         "👤 **𝖴𝗌𝖾𝗋:** {mention}\n\n"
         "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 <b>𝗄𝗇𝗈𝗐</b> <b>𝗁𝗈𝗐</b> 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
     ).format(mention=message.from_user.mention if message.from_user else "𝖴𝗌𝖾𝗋")
@@ -172,15 +172,15 @@ async def start_cmd(client: Client, message: Message):
         await message.reply_photo(photo=START_IMG, caption=caption, reply_markup=START_BUTTONS)
         await send_log(client, f"👤 #𝖲𝖳𝖠𝖱𝖳\n\n𝖴𝗌𝖾𝗋: {message.from_user.mention if message.from_user else '𝖴𝗇𝗄𝗇𝗈𝗐𝗇'}\n𝖨𝖣: `{message.from_user.id if message.from_user else '𝖭/𝖠'}`")
     else:
-        await message.reply_text("👋 𝖧𝖾||𝗈! 𝖨 𝖺𝗆 𝖺|𝗂𝗏𝖾 𝖺𝗇𝖽 𝗐𝗈𝗋𝗄𝗂𝗇𝗀. 𝖯|𝖾𝖺𝗌𝖾 𝖯𝖬 𝗆𝖾 𝖿𝗈𝗋 𝗆𝗈𝗋𝖾 𝗂𝗇𝖿𝗈.", reply_markup=START_BUTTONS)
+        await message.reply_text("👋 𝖧𝖾||𝗈! 𝖨 𝖺𝗆 𝖺|𝗂𝗏𝖾 𝖺𝗇𝖽 𝗈𝗋𝗄𝗂𝗇𝗀. 𝖯|𝖾𝖺𝗌𝖾 𝖯𝖬 𝗆𝖾 𝖿𝗈𝗋 𝗆𝗈𝗋𝖾 𝗂𝗇𝖿𝗈.", reply_markup=START_BUTTONS)
 
 @app.on_message(filters.command("help"))
 async def help_cmd(client: Client, message: Message):
     help_text = (
-        "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
-        "𝟣. 𝖡𝗈𝗍 <b><b><b><b>𝗄𝗈</b></b></b></b> 𝖺𝗉𝗇𝖾 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
-        "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** <b>𝗄𝗂</b> 𝖺𝖽𝗆𝗂𝗇 𗗗𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-        "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 <b>𝗄𝗈𝗂</b> 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 <b>𝖽𝖾|𝖾𝗍𝖾</b> 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
+        "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨index𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
+        "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 <b>𝗄𝖺𝗋𝖾𝗂𝗇</b>.\n"
+        "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𗗗𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈ၼ် 𝖽𝖾𝗂𝗇.\n"
+        "𝟥. 𝖡𝖺𝗌! <b>𝖠𝖻</b> 𗗗𝗋𝗈𝗎𝗉 <b>𝗆𝖾</b> 𝗄𝗈𝗂 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻<b>𝗈𝗍</b> 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 𝗄𝖺𝗋 𝖽𝖾𝗀𝖺."
     )
     await message.reply_text(help_text, reply_markup=BACK_BUTTON)
 
@@ -190,8 +190,8 @@ async def callback_handler(client: Client, query):
         help_text = (
             "📖 **𝖤𝖣𝖨𝖳 𝖦𝖴𝖠𝖱𝖣𝖨𝖠𝖭 𝖦𝖴𝖨𝖣𝖤**\n\n"
             "𝟣. 𝖡𝗈𝗍 𝗄𝗈 𝖺𝗉𝗇𝖾 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝖺𝖽𝖽 𝗄𝖺𝗋𝖾𝗂𝗇.\n"
-            "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𗗗𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 𝖽𝖾𝗂𝗇.\n"
-            "𝟥. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 <b>𝗄𝗈𝗂</b> 𝖻𝗁𝗂 (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 <b>𝗄𝖺𝗋</b> 𝖽𝖾𝗀𝖺."
+            "𝟤. 𝖨𝗌𝖾 **𝖣𝖾|𝖾𝗍𝖾 𝖬𝖾𝗌𝗌𝖺𝗀𝖾𝗌** 𝗄𝗂 𝖺𝖽𝗆𝗂𝗇 𗗗𝖾𝗋𝗆𝗂𝗌𝗌𝗂𝗈𝗇 <b>𝖽𝖾𝗂𝗇</b>.\n"
+            "𗟵. 𝖡𝖺𝗌! 𝖠𝖻 𗗗𝗋𝗈𝗎𝗉 𝗆𝖾 𝗄𝗈𝗂 𝖻<b>𝗁𝗂</b> (𝖠𝖽𝗆𝗂𝗇, 𝖮𗗗𝗇𝖾𝗋, 𝖬𝖾𝗆𝖻𝖾𝗋 𗗗𝖺 𝖡𝗈𝗍) 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍 𝗄𝖺𝗋𝖾𝗀𝖺, 𝗍𝗈 𝖻𝗈𝗍 𝗎𝗌𝖾 𝖽𝖾|𝖾𝗍𝖾 <b>𝗄𝖺𝗋</b> 𝖽𝖾𝗀𝖺."
         )
         try:
             await query.message.edit_caption(caption=help_text, reply_markup=BACK_BUTTON)
@@ -199,9 +199,9 @@ async def callback_handler(client: Client, query):
             await query.message.edit_text(text=help_text, reply_markup=BACK_BUTTON)
     elif query.data == "back_start":
         caption = (
-            "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺...  Bot ✨\n\n"
-            "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𗗗𝗋𝗈𝗍𝖾𝖼𝗍 𝗒𝗈𝗎𝗋 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
-            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 <b>𝗌𝖾𝗍</b> 𝗆𝖾 𝗎𝗉."
+            "✨ 𝖶𝖾|𝖼𝗈𝗆𝖾 𝗍𝗈 𝖤𝖽𝗂𝗍 𝖦𝗎𝖺𝗋𝖽𝗂𝖺𝗇 𝖡𝗈𝗍 ✨\n\n"
+            "🛡️ 𝖨 𝖺𝗆 𝗁𝖾𝗋𝖾 𝗍𝗈 𗗗𝗋𝗈𝗍𝖾𝖼𝗍 𝗒<b>𝗈𝗎𝗋</b> 𗗗𝗋𝗈𝗎𝗉𝗌 𝖿𝗋𝗈𝗆 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝖾𝖽𝗂𝗍𝗂𝗇𝗀!\n\n"
+            "» 𝖢|𝗂𝖼𝗄 𝗈𝗇 𝗍𝗁𝖾 **𝖧𝖾|𝗉 & 𝖦𝗎𝗂𝖽𝖾** 𝖻𝗎𝗍𝗍𝗈𝗇 𝖻𝖾|𝗈𝗐 𝗍𝗈 𝗄𝗇𝗈𝗐 𝗁𝗈𝗐 𝗍𝗈 𝗌𝖾𝗍 𝗆𝖾 𝗎𝗉."
         )
         try:
             await query.message.edit_caption(caption=caption, reply_markup=START_BUTTONS)
@@ -214,10 +214,10 @@ async def callback_handler(client: Client, query):
 @app.on_message(filters.command("broadcast"))
 async def broadcast_cmd(client: Client, message: Message):
     if not message.reply_to_message:
-        await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 <b>𝗋𝖾𝗉|𝗒</b> 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍!")
+        await message.reply_text("❌ 𝖯|𝖾𝖺𝗌𝖾 𝗋𝖾𝗉|𝗒 𝗍𝗈 𝖺 𝗆𝖾𝗌𝗌𝖺𝗀𝖾 𝗍𝗈 𝖻𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍!")
         return
         
-    msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𝗉𝗋𝗈𝗀𝗋𝖾𝗌𝗌...")
+    msg = await message.reply_text("⚡ 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍𝗂𝗇𝗀 𝗂𝗇 𗗗𝗋𝗈𝗀𝗋𝖾𝗌..." )
     success = 0
     all_chats = await get_all_chats()
     
@@ -232,7 +232,7 @@ async def broadcast_cmd(client: Client, message: Message):
         except Exception:
             await remove_chat(chat_id)
             
-    await msg.edit_text(f"📢 𝖡𝗋𝗈𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾𝖽!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
+    await msg.edit_text(f"📢 𝖡𝗋ོ་𝖺𝖽𝖼𝖺𝗌𝗍 𝖢𝗈𝗆𝗉|𝖾𝗍𝖾𝖽!\n\n✅ 𝖲𝖾𝗇𝗍 𝖺𝗇𝖽 𝖯𝗂𝗇𝗇𝖾𝖽 𝗂𝗇 {success} 𝖼𝗁𝖺𝗍𝗌.")
 
 # ==========================================================
 # 🔔 SERVICE LOGS SYSTEM
@@ -262,9 +262,30 @@ async def service_leave_log(client: Client, message: Message):
         await send_log(client, log_text)
 
 # ==========================================================
-# 🔥 EDIT GUARDIAN CORE FUNCTION (REACTION SAFE + 50K TRACKER)
+# 🔥 EDIT GUARDIAN CORE FUNCTION (100% REACTION PROOF VIA RAW FILTERS)
 # ==========================================================
-@app.on_edited_message(filters.group)
+# कस्टम फ़िल्टर: यह केवल तभी आगे बढ़ेगा जब टेलीग्राम से आने वाला अपडेट 'सच्चा एडिट' (UpdateEditMessage) हो।
+# अगर केवल रिएक्शन आएगा, तो टेलीग्राम बैकएंड में अलग अपडेट भेजता है, जिसे यह फ़िल्टर यहीं रोक देगा।
+async def raw_edit_filter(_, client: Client, message: Message):
+    # अगर बोट का अपना मैसेज है या कोई और बोट है, तो तुरंत छोड़ दो
+    if message.from_user and message.from_user.is_bot:
+        return False
+        
+    # Pyrogram के इंटरनल रॉ अपडेट्स चेक करें
+    raw_updates = getattr(client, "_raw_updates", [])
+    if raw_updates:
+        for update in raw_updates:
+            # केवल तभी True रिटर्न करें जब अपडेट असली टेक्स्ट/मीडिया एडिट का हो
+            if isinstance(update, (UpdateEditMessage, UpdateEditChannelMessage)):
+                return True
+        return False
+    
+    # सेफ साइड के लिए: अगर रॉ अपडेट्स लिस्ट खाली है, तो सामान्य चेकिंग पर वापस जाएँ
+    return True
+
+only_true_edits = filters.create(raw_edit_filter)
+
+@app.on_edited_message(filters.group & ~filters.bot & only_true_edits)
 async def handle_edited_message(client: Client, message: Message):
     new_text = message.text or message.caption
     if not new_text:
@@ -281,14 +302,14 @@ async def handle_edited_message(client: Client, message: Message):
     try:
         await add_chat(message.chat.id)
         user = message.from_user
-        if not user: return # सिस्टम मैसेज को इग्नोर करें
+        if not user: return # सिस्टम मैसेजेस को इग्नोर करें
         
         mention = user.mention
         username = f"@{user.username}" if user.username else "No Username"
         
         text = (
             f"╔══════════════════════╗\n"
-            f"   🚨 **𝐄𝐃𝐈𝐓  𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃  𝐀|𝐄𝐑𝐓** 🚨\n"
+            f"   🚨 **𝐄𝐃𝐈𝐓  𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃  𝐀𝐋𝐄𝐑𝐓** 🚨\n"
             f"╚══════════════════════╝\n\n"
             f"🚫 **Hey {mention}, Editing messages is strictly**\n"
             f"**prohibited due to copyright & safety!**\n\n"
@@ -336,6 +357,17 @@ async def handle_edited_message(client: Client, message: Message):
 async def main():
     threading.Thread(target=run_server, daemon=True).start()
     print("✨ @EditXguardbot is starting up successfully...")
+    
+    # रॉ अपडेट्स को ट्रैक करने के लिए हुक सेट करें
+    @app.on_raw_update()
+    async def raw_update_handler(client: Client, update, users, chats):
+        if not hasattr(client, "_raw_updates"):
+            client._raw_updates = []
+        client._raw_updates.append(update)
+        # लिस्ट बहुत बड़ी न हो इसलिए आखिरी 10 अपडेट्स ही रखें
+        if len(client._raw_updates) > 10:
+            client._raw_updates.pop(0)
+
     await app.start()
     await idle()
     await app.stop()
